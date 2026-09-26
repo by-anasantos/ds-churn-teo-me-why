@@ -1,0 +1,5 @@
+tabela,linhas,colunas,colunas com nulo,chave
+clientes,5785,9,0,idCliente
+transacoes,352304,5,0,IdTransacao
+transacao_produto,353341,5,1,idTransacaoProduto
+produtos,123,4,1,IdProduto

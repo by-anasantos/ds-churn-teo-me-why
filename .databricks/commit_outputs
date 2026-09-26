@@ -1,5 +1,1 @@
- {
-     "version": 1.0,
-     "allowlist": ["*.ipynb"],
-     "denylist": []
-   }
+   *.ipynb

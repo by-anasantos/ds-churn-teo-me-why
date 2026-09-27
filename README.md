@@ -39,15 +39,15 @@
 
 <ul>
   <li><b>Problema:</b> quase metade dos usuários ativos da comunidade deixa de participar a cada mês, e a base ativa encolheu de cerca de 675 para cerca de 250 usuários por mês entre 2024 e 2026.</li>
-  <li><b>Abordagem:</b> 352 mil transações transformadas em uma base analítica mensal (usuário × mês). 11 hipóteses, organizadas em 7 blocos de comportamento, foram testadas com a taxa de churn por faixa.</li>
-  <li><b>Resultado:</b> os sinais mais fortes são a <b>presença nas lives</b>, a <b>recência</b> e a <b>frequência</b>. Vínculo (streak, variedade de interação, uso da loja) também protege. A tendência de queda na atividade <b>não</b> explica o churn.</li>
+  <li><b>Abordagem:</b> 352 mil transações do sistema de pontos e 43 mil episódios da plataforma de cursos transformados em uma base analítica mensal (usuário × mês). 12 hipóteses, organizadas em 8 blocos.</li>
+  <li><b>Resultado:</b> os sinais mais fortes são a <b>presença nas lives</b>, a <b>recência</b> e a <b>frequência</b>. Vínculo (streak, variedade de interação, uso da loja, histórico de cursos) também protege. A tendência de queda na atividade <b>não</b> explica o churn.</li>
   <li><b>Próximo passo:</b> modelo de classificação para listar os 50 usuários com maior probabilidade de churn.</li>
 </ul>
 
 <a name="quadro"></a>
 <h2>🧩 Quadro resumo: hipóteses e features</h2>
 
-<p>11 hipóteses, organizadas em 7 blocos de comportamento. A tabela completa está na seção 10 do <a href="03_eda.ipynb"><code>03_eda</code></a>.</p>
+<p>12 hipóteses, organizadas em 8 blocos de comportamento. A tabela completa está na seção 11 do <a href="03_eda.ipynb"><code>03_eda</code></a>.</p>
 
 <table>
   <tr>
@@ -118,7 +118,13 @@
     <td>✅ 14% vs 51%</td>
     <td><code>gastouD28</code></td>
   </tr>
-</table>
+ <tr>
+    <td><b>H. Educação</b></td>
+    <td>Quem estuda na plataforma sai menos</td>
+    <td>❌ Estudo recente não protege (49% vs 50%); quem já estudou e parou sai menos (38%)</td>
+    <td><code>flFezCurso</code>, <code>diasDesdeUltimoEp</code></td>
+  </tr>
+  </table>
 
 <a name="problema"></a>
 <h2>🎯 Problema de negócio</h2>
@@ -207,7 +213,13 @@
     <td align="center"><b>34%</b></td>
     <td align="center">68%</td>
   </tr>
+    <tr>
+    <td>Já fez curso na plataforma, mas parou (desde mar/2025)</td>
+    <td align="center"><b>38%</b></td>
+    <td align="center">50% (nunca fez)</td>
+  </tr>
 </table>
+<p>Estudar <b>agora</b> não reduz o churn (49%, igual a quem nunca fez curso). Uma explicação possível: quem está maratonando um curso assiste às aulas gravadas no lugar das lives, e isso conta como churn sem ser abandono da comunidade.</p>
 
 <h3>6. Hipótese refutada: a tendência não explica o churn</h3>
 <p>Usuários com atividade "caindo" pareciam sair mais, mas o efeito some quando se comparam usuários com a mesma frequência. O que parecia tendência era volume.</p>
@@ -279,7 +291,7 @@
   </tr>
 </table>
 
-<p><b>Hipóteses organizadas por bloco.</b> As features candidatas foram mapeadas em 7 blocos sem sobreposição. Cada hipótese foi testada com análise univariada, bivariada (taxa de churn por faixa, com intervalo de confiança de 95%) e multivariada, controlando uma variável pela outra. O resultado de cada hipótese está no <a href="#quadro">quadro resumo</a>.</p>
+<p><b>Hipóteses organizadas por bloco.</b> As features candidatas foram mapeadas em 8 blocos sem sobreposição. Cada hipótese foi testada com análise univariada, bivariada (taxa de churn por faixa, com intervalo de confiança de 95%) e multivariada, controlando uma variável pela outra. O resultado de cada hipótese está no <a href="#quadro">quadro resumo</a>.</p>
 
 
 
@@ -314,11 +326,34 @@
       <td align="right">123</td>
     </tr>
   </table>
+    <p>Plataforma de cursos (<code>workspace.tmw_education</code>), ligada ao sistema de pontos por <code>usuarios_tmw</code>:</p>
+  <table>
+    <tr>
+      <th align="left">Tabela</th>
+      <th align="left">Conteúdo</th>
+      <th align="right">Linhas</th>
+    </tr>
+    <tr>
+      <td><code>cursos_episodios_completos</code></td>
+      <td>Episódios concluídos por usuário (fev/2025 a set/2026)</td>
+      <td align="right">43.185</td>
+    </tr>
+    <tr>
+      <td><code>cursos_episodios</code></td>
+      <td>Catálogo de episódios de cada curso</td>
+      <td align="right">375</td>
+    </tr>
+    <tr>
+      <td><code>usuarios_tmw</code></td>
+      <td>Ligação entre o usuário da plataforma e o cliente do sistema de pontos</td>
+      <td align="right">2.502</td>
+    </tr>
+  </table>
   <p><b>Pontos de atenção levantados no discovery:</b></p>
   <ul>
     <li>35% dos clientes cadastrados nunca transacionaram.</li>
     <li><code>qtdePontos</code> e <code>DtAtualizacao</code> do cadastro são uma foto atual. Não entram como feature, para evitar vazamento.</li>
-    <li>Cinco produtos concentram 98% dos itens, com o chat respondendo por 82%.</li>
+    <li>Cinco produtos concentram 98% dos itens, com o chat respondendo por 82%.</li> A plataforma de cursos só tem histórico a partir de fev/2025, e 54% dos usuários com episódio não têm vínculo com o sistema de pontos.</li>
   </ul>
 </details>
 

@@ -10,7 +10,9 @@
   <img src="https://img.shields.io/badge/Databricks-003d48?style=for-the-badge&logo=databricks&logoColor=white" alt="Databricks">
   <img src="https://img.shields.io/badge/PySpark-003d48?style=for-the-badge&logo=apachespark&logoColor=white" alt="PySpark">
   <img src="https://img.shields.io/badge/pandas-003d48?style=for-the-badge&logo=pandas&logoColor=white" alt="pandas">
-  <img src="https://img.shields.io/badge/status-EDA%20conclu%C3%ADda-00C2F0?style=for-the-badge" alt="Status">
+  <img src="https://img.shields.io/badge/scikit--learn-003d48?style=for-the-badge&logo=scikitlearn&logoColor=white" alt="scikit-learn">
+  <img src="https://img.shields.io/badge/MLflow-003d48?style=for-the-badge&logo=mlflow&logoColor=white" alt="MLflow">
+  <img src="https://img.shields.io/badge/status-modelo%20v0-00C2F0?style=for-the-badge" alt="Status">
 </p>
 
 <p align="center">

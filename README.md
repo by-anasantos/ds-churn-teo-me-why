@@ -1,4 +1,3 @@
-
 <h1 align="center">Churn na comunidade Téo Me Why</h1>
 
 <p align="center">
@@ -20,6 +19,7 @@
   <a href="#quadro">Quadro resumo</a> •
   <a href="#problema">Problema</a> •
   <a href="#achados">Achados</a> •
+  <a href="#modelo">Modelo</a> •
   <a href="#recomendacoes">Recomendações</a> •
   <a href="#abordagem">Abordagem</a> •
   <a href="#notebooks">Notebooks</a> •
@@ -43,7 +43,7 @@
   <li><b>Problema:</b> quase metade dos usuários ativos da comunidade deixa de participar a cada mês, e a base ativa encolheu de cerca de 675 para cerca de 250 usuários por mês entre 2024 e 2026.</li>
   <li><b>Abordagem:</b> 352 mil transações do sistema de pontos e 43 mil episódios da plataforma de cursos transformados em uma base analítica mensal (usuário × mês). 12 hipóteses, organizadas em 8 blocos de comportamento, foram testadas com a taxa de churn por faixa.</li>
   <li><b>Resultado:</b> os sinais mais fortes são a <b>presença nas lives</b>, a <b>recência</b> e a <b>frequência</b>. Vínculo (streak, variedade de interação, uso da loja, histórico de cursos) também protege. A tendência de queda na atividade <b>não</b> explica o churn.</li>
-  <li><b>Próximo passo:</b> modelo de classificação para listar os 50 usuários com maior probabilidade de churn.</li>
+  <li><b>Modelo:</b> 11 algoritmos comparados. O Random Forest foi o escolhido e, no mês de validação (ago/2026), <b>82% dos 50 usuários de maior risco saíram de fato</b>, contra 44% da média: 1,9 vezes mais acerto do que escolher ao acaso.</li>
 </ul>
 
 <a name="quadro"></a>
@@ -233,6 +233,49 @@
   </p>
 </details>
 
+<a name="modelo"></a>
+<h2>🤖 Modelo</h2>
+
+<table>
+  <tr>
+    <th align="left">Etapa</th>
+    <th align="left">Resultado</th>
+  </tr>
+  <tr>
+    <td><b>Referência sem modelo</b></td>
+    <td>Ordenar só pela recência: AUC 0,735</td>
+  </tr>
+  <tr>
+    <td><b>Comparação</b></td>
+    <td>11 algoritmos registrados no MLflow, escolhidos pela AUC da validação cruzada</td>
+  </tr>
+  <tr>
+    <td><b>Modelo escolhido</b></td>
+    <td>Random Forest: AUC 0,806 na validação cruzada e 0,794 no teste (empatado com CatBoost, porém mais simples)</td>
+  </tr>
+  <tr>
+    <td><b>Mês novo (ago/2026)</b></td>
+    <td>Precisão de 82% no top 50, contra 44% de churn médio</td>
+  </tr>
+  <tr>
+    <td><b>Calibração</b></td>
+    <td>Prevê 49% de churn médio contra 44% real. A ordem está correta, e a recalibração fica para a v1</td>
+  </tr>
+  <tr>
+    <td><b>O que mais pesa</b></td>
+    <td>Presença nas lives, recência e dias ativos, e regularidade entre visitas</td>
+  </tr>
+</table>
+
+<details>
+  <summary><b>Ver gráficos do modelo</b></summary>
+  <br>
+  <p align="center">
+    <img src="output/figs/13_roc_modelo_final.png" width="48%" alt="Curva ROC do modelo final">
+    <img src="output/figs/14_importancia_por_bloco.png" width="48%" alt="Importância por bloco">
+  </p>
+</details>
+
 <a name="recomendacoes"></a>
 <h2>💡 Recomendações para o negócio</h2>
 
@@ -245,9 +288,9 @@
     <th align="left">Como medir</th>
   </tr>
   <tr>
-    <td>O churn chega a 50% no 6º dia sem aparecer</td>
-    <td>Lembrete ou bônus de pontos a partir do 4º ou 5º dia sem interação</td>
-    <td>Churn em 28 dias de quem recebeu vs grupo de controle</td>
+    <td>O modelo identifica quem está em risco antes de sumir</td>
+    <td>Durante a live ou o curso, acionar os usuários do top 50 (menção no chat, bônus de pontos)</td>
+    <td>Teste A/B no chat: churn em 28 dias de quem foi acionado vs grupo de controle</td>
   </tr>
   <tr>
     <td>O risco é maior entre o 15º e o 28º dia de casa (69%)</td>
@@ -382,11 +425,19 @@
   </tr>
   <tr>
     <td><a href="03_eda.ipynb"><code>03_eda</code></a></td>
-    <td>Teste das hipóteses por bloco e seleção das features para o modelo</td>
+    <td>Teste das hipóteses por bloco e síntese dos achados</td>
   </tr>
   <tr>
     <td><a href="04_figuras_readme.ipynb"><code>04_figuras_readme</code></a></td>
     <td>Figuras usadas neste README</td>
+  </tr>
+  <tr>
+    <td><a href="05_treino.ipynb"><code>05_treino</code></a></td>
+    <td>Bases de treino, teste e out-of-time, tratamento de nulos no pipeline e treino de 11 algoritmos no MLflow</td>
+  </tr>
+  <tr>
+    <td><a href="06_avaliacao.ipynb"><code>06_avaliacao</code></a></td>
+    <td>Comparação dos algoritmos, escolha do modelo, curva ROC, calibração, top 50 e importância por bloco</td>
   </tr>
 </table>
 
@@ -396,8 +447,10 @@
 ├── 02_abt.ipynb
 ├── 03_eda.ipynb
 ├── 04_figuras_readme.ipynb
+├── 05_treino.ipynb
+├── 06_avaliacao.ipynb
 └── output/
-    ├── figs/            # figuras do discovery e da EDA
+    ├── figs/            # figuras do discovery, da EDA e do modelo
     │   └── readme/      # figuras deste README
     └── tables/          # tabelas de apoio
 </pre>
@@ -407,21 +460,21 @@
 
 <ol>
   <li>No Databricks, crie uma pasta Git a partir deste repositório (<b>Workspace → Criar → Pasta Git</b>).</li>
-  <li>Garanta acesso às tabelas <code>(https://www.kaggle.com/datasets/teocalvo/teomewhy-loyalty-system)*</code>.</li>
-  <li>Rode os notebooks na ordem: <code>01_discovery</code> → <code>02_abt</code> → <code>03_eda</code> → <code>04_figuras_readme</code>. Cada um chama o <code>00_setup</code> automaticamente com <code>%run ./00_setup</code>.</li>
+  <li>Garanta acesso às tabelas do <a href="https://www.kaggle.com/datasets/teocalvo/teomewhy-loyalty-system">sistema de pontos (Kaggle)</a>.</li>
+  <li>Rode os notebooks na ordem: <code>01_discovery</code> → <code>02_abt</code> → <code>03_eda</code> → <code>04_figuras_readme</code> → <code>05_treino</code> → <code>06_avaliacao</code>. Cada um chama o <code>00_setup</code> automaticamente com <code>%run ./00_setup</code>.</li>
 </ol>
 
-<p><b>Stack:</b> Databricks · PySpark · Spark SQL · pandas · matplotlib · seaborn</p>
+<p><b>Stack:</b> Databricks · PySpark · Spark SQL · pandas · scikit-learn · feature-engine · MLflow · matplotlib · seaborn</p>
 
 <h2>🚀 Próximos passos</h2>
 
 <ul>
   <li>✅ Entendimento do negócio e dos dados</li>
   <li>✅ Base analítica com separação out-of-time</li>
-  <li>✅ Análise exploratória e seleção de features</li>
-  <li>⬜ Modelo baseline (regra de recência) e modelos de classificação</li>
-  <li>⬜ Avaliação na safra out-of-time (ago/2026) e escolha do ponto de corte</li>
-  <li>⬜ Lista dos 50 usuários com maior probabilidade de churn</li>
+  <li>✅ Análise exploratória</li>
+  <li>✅ Modelo v0: 11 algoritmos, comparação com a recência e avaliação no out-of-time</li>
+  <li>⬜ Lista dos 50 usuários com maior probabilidade de churn (base de ativos atual)</li>
+  <li>⬜ Modelo v1: features de cursos, menos overfitting e recalibração das probabilidades</li>
   <li>⬜ Plano de monitoramento do modelo</li>
 </ul>
 

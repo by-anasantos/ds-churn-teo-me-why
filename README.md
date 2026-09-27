@@ -39,7 +39,7 @@
 
 <ul>
   <li><b>Problema:</b> quase metade dos usuários ativos da comunidade deixa de participar a cada mês, e a base ativa encolheu de cerca de 675 para cerca de 250 usuários por mês entre 2024 e 2026.</li>
-  <li><b>Abordagem:</b> 352 mil transações do sistema de pontos e 43 mil episódios da plataforma de cursos transformados em uma base analítica mensal (usuário × mês). 12 hipóteses, organizadas em 8 blocos de comportamento, foram testadas com a taxa de churn por faixa.</li></li>
+  <li><b>Abordagem:</b> 352 mil transações do sistema de pontos e 43 mil episódios da plataforma de cursos transformados em uma base analítica mensal (usuário × mês). 12 hipóteses, organizadas em 8 blocos de comportamento, foram testadas com a taxa de churn por faixa.</li>
   <li><b>Resultado:</b> os sinais mais fortes são a <b>presença nas lives</b>, a <b>recência</b> e a <b>frequência</b>. Vínculo (streak, variedade de interação, uso da loja, histórico de cursos) também protege. A tendência de queda na atividade <b>não</b> explica o churn.</li>
   <li><b>Próximo passo:</b> modelo de classificação para listar os 50 usuários com maior probabilidade de churn.</li>
 </ul>

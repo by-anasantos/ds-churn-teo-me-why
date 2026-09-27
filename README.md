@@ -39,7 +39,7 @@
 
 <ul>
   <li><b>Problema:</b> quase metade dos usuários ativos da comunidade deixa de participar a cada mês, e a base ativa encolheu de cerca de 675 para cerca de 250 usuários por mês entre 2024 e 2026.</li>
-  <li><b>Abordagem:</b> 352 mil transações do sistema de pontos e 43 mil episódios da plataforma de cursos transformados em uma base analítica mensal (usuário × mês). 12 hipóteses, organizadas em 8 blocos.</li>
+  <li><b>Abordagem:</b> 352 mil transações do sistema de pontos e 43 mil episódios da plataforma de cursos transformados em uma base analítica mensal (usuário × mês). 12 hipóteses, organizadas em 8 blocos de comportamento, foram testadas com a taxa de churn por faixa.</li></li>
   <li><b>Resultado:</b> os sinais mais fortes são a <b>presença nas lives</b>, a <b>recência</b> e a <b>frequência</b>. Vínculo (streak, variedade de interação, uso da loja, histórico de cursos) também protege. A tendência de queda na atividade <b>não</b> explica o churn.</li>
   <li><b>Próximo passo:</b> modelo de classificação para listar os 50 usuários com maior probabilidade de churn.</li>
 </ul>
@@ -353,7 +353,8 @@
   <ul>
     <li>35% dos clientes cadastrados nunca transacionaram.</li>
     <li><code>qtdePontos</code> e <code>DtAtualizacao</code> do cadastro são uma foto atual. Não entram como feature, para evitar vazamento.</li>
-    <li>Cinco produtos concentram 98% dos itens, com o chat respondendo por 82%.</li> A plataforma de cursos só tem histórico a partir de fev/2025, e 54% dos usuários com episódio não têm vínculo com o sistema de pontos.</li>
+    <li>Cinco produtos concentram 98% dos itens, com o chat respondendo por 82%.</li>
+    <li>A plataforma de cursos só tem histórico a partir de fev/2025, e 54% dos usuários com episódio não têm vínculo com o sistema de pontos.</li>
   </ul>
 </details>
 
@@ -425,6 +426,6 @@
 <hr>
 
 <p align="center">
-  Projeto desenvolvido por <b>Ana Santos</b> no curso de Pós Graduação de Ciência de Dados da ASN Rocks pelo professor Teo me why <a href="https://www.twitch.tv/teomewhy">Téo Me Why</a><br>
+  Projeto desenvolvido por <b>Ana Santos</b> na pós-graduação em Ciência de Dados da ASN Rocks, com o professor <a href="https://www.twitch.tv/teomewhy">Téo Calvo (Téo Me Why)</a><br>
   <a href="https://github.com/by-anasantos">GitHub</a>
 </p>

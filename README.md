@@ -175,10 +175,16 @@
   <li>✅ Análise exploratória por bloco de comportamento</li>
   <li>✅ Modelo v0 registrado no MLflow e lista dos 50 usuários de maior risco</li>
   <li>⬜ Modelo v1: recalibração das probabilidades e menos overfitting</li>
+  <li>⬜ Tratar variáveis correlacionadas (ex.: recência e lives perdidas, 0,96) e usar importância por permutação</li>
   <li>⬜ Plano de monitoramento do modelo</li>
 </ul>
 
 <hr>
+
+<p align="center">
+  Projeto desenvolvido por <b>Ana Santos</b> na pós-graduação em Ciência de Dados da ASN Rocks, com o professor <a href="https://www.twitch.tv/teomewhy">Téo Calvo (Téo Me Why)</a> · <a href="https://github.com/by-anasantos">GitHub</a>
+</p>
+
 
 <p align="center">
   Projeto desenvolvido por <b>Ana Santos</b> na pós-graduação em Ciência de Dados da ASN Rocks, com o professor <a href="https://www.twitch.tv/teomewhy">Téo Calvo (Téo Me Why)</a> · <a href="https://github.com/by-anasantos">GitHub</a>

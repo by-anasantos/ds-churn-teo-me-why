@@ -29,7 +29,7 @@
   <li><b>Problema:</b> quase metade dos usuários ativos deixa de participar a cada mês, e a base ativa encolheu de cerca de 675 para cerca de 250 usuários por mês entre 2024 e 2026.</li>
   <li><b>O que explica o churn:</b> presença nas lives é o sinal mais forte, seguida de recência e frequência. Streak, variedade de interação e uso da loja também protegem. A tendência de queda na atividade <b>não</b> explica o churn.</li>
   <li><b>Modelo:</b> 5 algoritmos comparados no MLflow. O Random Forest foi o escolhido: maior AUC na validação cruzada (0,819) e no mês de validação (0,868 em jun/2026). Nesse mês, <b>80% dos 50 usuários de maior risco saíram de fato</b>, contra 44% da média: 1,8 vez mais acerto do que escolher ao acaso.</li>
-  <li><b>Entrega:</b> modelo registrado no MLflow e <code>07_predict</code>, que pontua a safra mais recente da feature store. Lista dos 50 usuários com maior probabilidade de churn nos 28 dias a partir de set/2026 (<a href="output/tables/top50_churn_v0.csv"><code>top50_churn_v0.csv</code></a>).</li>
+  <li><b>Entrega:</b> modelo registrado no MLflow e <code>07_predict</code>, que pontua a safra de jul/2026 (o mesmo corte da aula). Lista dos 50 usuários com maior probabilidade de churn nos 28 dias a partir de 01/07/2026 (<a href="output/tables/top50_churn_2026-07-01.csv"><code>top50_churn_2026-07-01.csv</code></a>). Como julho já aconteceu e o modelo nunca viu esse mês, deu para conferir: <b>88% desses 50 saíram de fato</b>, contra 45% da média: 2,0 vezes mais acerto.</li>
 </ul>
 
 <h2>🧭 Abordagem</h2>
@@ -61,7 +61,7 @@
   </tr>
   <tr>
     <td><b>Pontuação</b></td>
-    <td>set/2026: usuários ativos em agosto, ainda sem alvo conhecido</td>
+        <td>jul/2026: usuários ativos em junho, mês fora do treino</td>
   </tr>
 </table>
 

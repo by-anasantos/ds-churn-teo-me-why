@@ -1,1 +1,251 @@
-<h1 align="center">Churn na comunidade Téo Me Why</h1> <p align="center"> <b>Quem vai deixar de participar da comunidade nos próximos 28 dias, e por quê?</b><br> Modelo de churn com dados reais do sistema de pontos de uma comunidade de dados na Twitch. </p> <p align="center"> <img src="https://img.shields.io/badge/Databricks-003d48?style=for-the-badge&logo=databricks&logoColor=white" alt="Databricks"> <img src="https://img.shields.io/badge/PySpark-003d48?style=for-the-badge&logo=apachespark&logoColor=white" alt="PySpark"> <img src="https://img.shields.io/badge/scikit--learn-003d48?style=for-the-badge&logo=scikitlearn&logoColor=white" alt="scikit-learn"> <img src="https://img.shields.io/badge/MLflow-003d48?style=for-the-badge&logo=mlflow&logoColor=white" alt="MLflow"> <img src="https://img.shields.io/badge/status-modelo%20v0-00C2F0?style=for-the-badge" alt="Status"> </p> <table align="center"> <tr> <td align="center" width="33%"><h2>48%</h2>dos usuários ativos<br>saem em 28 dias</td> <td align="center" width="33%"><h2>62% → 1%</h2>de churn conforme a<br>presença nas lives aumenta</td> <td align="center" width="33%"><h2>88%</h2>dos 50 de maior risco em julho<br>saíram de fato (vs 45%)</td> </tr> </table> <hr> <h2>📌 Resumo</h2> <ul> <li><b>Problema:</b> quase metade dos usuários ativos deixa de participar a cada mês, e a base ativa encolheu de cerca de 675 para cerca de 250 usuários por mês entre 2024 e 2026.</li> <li><b>O que explica o churn:</b> presença nas lives é o sinal mais forte, seguida de recência e frequência. Streak, variedade de interação e uso da loja também protegem. A tendência de queda na atividade <b>não</b> explica o churn.</li> <li><b>Modelo:</b> 5 algoritmos comparados no MLflow. O Random Forest foi o escolhido pela maior AUC na validação cruzada (0,819); no teste fez 0,780 e no out-of-time (jun/2026), 0,868. Nesse mês, <b>80% dos 50 usuários de maior risco saíram de fato</b>, contra 44% da média: 1,8 vez mais acerto do que escolher ao acaso.</li> <li><b>Entrega:</b> modelo registrado no MLflow e <code>07_predict</code>, que pontua a safra de jul/2026 (o mesmo corte da aula) e gera a lista dos 50 usuários com maior probabilidade de churn nos 28 dias a partir de 01/07/2026 (<a href="output/tables/top50_churn_2026-07-01.csv"><code>top50_churn_2026-07-01.csv</code></a>). Como julho já aconteceu e o modelo nunca viu esse mês, deu para conferir: <b>88% desses 50 saíram de fato</b>, contra 45% da média: 2,0 vezes mais acerto.</li> </ul> <h2>🔍 O que explica o churn (análise bivariada, <code>03_eda</code>)</h2> <table> <tr><th align="left">Bloco</th><th align="left">Achado</th></tr> <tr><td><b>F. Comunidade</b></td><td>Presença nas lives é o sinal mais forte: o churn cai de 62% (até 25% das lives) para 1% (acima de 75%). Quanto mais lives perdidas desde a última presença, maior o churn.</td></tr> <tr><td><b>B. Volume</b></td><td>Recência: o churn dispara depois de uma semana sem aparecer. Recência e frequência juntas separam o risco de 1% a 80%.</td></tr> <tr><td><b>E. Hábito</b></td><td>Streak e variedade de tipos de interação indicam vínculo e reduzem o churn.</td></tr> <tr><td><b>G. Loja</b></td><td>Quem gastou pontos sai menos.</td></tr> <tr><td><b>A. Perfil</b></td><td>O risco é maior entre a 3ª e a 4ª semana de casa.</td></tr> <tr><td><b>C. Tendência</b></td><td>Hipótese refutada: com a mesma frequência, quem está caindo não sai mais.</td></tr> <tr><td><b>H. Educação</b></td><td>Ter histórico de curso protege um pouco; estudar agora, não. As features de cursos quase não separam quem sai de quem fica.</td></tr> </table> <p>Os gráficos de cada análise estão em <a href="output/figs"><code>output/figs</code></a>.</p> <h2>🧭 Abordagem</h2> <table> <tr> <th align="left">Etapa</th> <th align="left">Definição</th> </tr> <tr> <td><b>Base</b></td> <td>Uma linha por usuário e mês (<code>dtRef</code>): quem teve ao menos uma transação nos 28 dias anteriores</td> </tr> <tr> <td><b>Alvo</b></td> <td><code>churn = 1</code> se o usuário não teve nenhuma transação nos 28 dias a partir da <code>dtRef</code></td> </tr> <tr> <td><b>Features</b></td> <td>Calculadas só com dados anteriores à <code>dtRef</code>, em 8 blocos de comportamento: perfil, volume, tendência, mix, hábito, comunidade, loja e educação</td> </tr> <tr> <td><b>Treino e teste</b></td> <td>27 meses, de mar/2024 a mai/2026: 10.082 observações de 3.523 usuários. Uma safra sorteada por usuário (como na aula), para que ninguém apareça no treino e no teste ao mesmo tempo; depois, 80/20 estratificado pelo alvo</td> </tr> <tr> <td><b>Validação cruzada</b></td> <td>3 dobras dentro dos 80% de treino, usadas para escolher entre os 5 algoritmos sem tocar no teste</td> </tr> <tr> <td><b>Out-of-time</b></td> <td>jun/2026 inteiro, reservado para validar o modelo num mês que ele nunca viu</td> </tr> <tr> <td><b>Pontuação</b></td> <td>jul/2026: usuários ativos em junho, mês fora do treino</td> </tr> </table> <h2>🤖 Modelo</h2> <table> <tr> <th align="left">Modelo</th> <th align="center">AUC treino</th> <th align="center">AUC validação cruzada</th> <th align="center">AUC teste</th> <th align="center">AUC out-of-time</th> </tr> <tr> <td><b>Random Forest</b> (escolhido)</td> <td align="center">0,912</td> <td align="center"><b>0,819</b></td> <td align="center">0,780</td> <td align="center"><b>0,868</b></td> </tr> <tr> <td>Regressão logística</td> <td align="center">0,827</td> <td align="center">0,805</td> <td align="center">0,784</td> <td align="center">0,816</td> </tr> <tr> <td>XGBoost</td> <td align="center">0,935</td> <td align="center">0,802</td> <td align="center">0,769</td> <td align="center">0,825</td> </tr> <tr> <td>LightGBM</td> <td align="center">0,978</td> <td align="center">0,792</td> <td align="center">0,772</td> <td align="center">0,828</td> </tr> <tr> <td>Árvore de decisão</td> <td align="center">0,862</td> <td align="center">0,773</td> <td align="center">0,760</td> <td align="center">0,842</td> </tr> <tr> <td><i>Referência: só a recência</i></td> <td align="center">—</td> <td align="center">—</td> <td align="center"><i>0,712</i></td> <td align="center">—</td> </tr> </table> <p><b>Como ler as AUCs:</b></p> <ul> <li><b>Treino:</b> medida nos mesmos 80% usados no ajuste. É otimista por definição e mostra quanto o modelo decora.</li> <li><b>Validação cruzada:</b> média da AUC em 3 dobras dos 80% de treino; o modelo ajusta em duas e é avaliado na terceira, que não viu. <b>É ela que escolhe o modelo.</b></li> <li><b>Teste:</b> 20% separados no início e avaliados uma única vez, depois da escolha.</li> <li><b>Out-of-time:</b> jun/2026, mês posterior a todo o treino. Confirma que a ordem se mantém no tempo.</li> </ul> <p>Com 5 modelos, escolher pelo teste favoreceria quem acertou por acaso; por isso a escolha usa a validação cruzada, e o teste e o out-of-time ficam isentos para medir. No Random Forest, a validação cruzada (0,819) ficou a 4 pontos do teste (0,780): a estimativa foi confiável. A distância de 13 pontos entre treino e teste mostra que o modelo memoriza parte da amostra; reduzir isso fica para a v1.</p> <p>As probabilidades saem altas (55% de churn previsto contra 44% real no out-of-time), mas a ordem dos usuários está correta: a recalibração fica para a v1.</p> <h2>⚙️ Decisões técnicas</h2> <ul> <li><b>Feature store sem vazamento:</b> cada safra é calculada só com dados anteriores à <code>dtRef</code> e gravada de forma incremental; treino e predição leem as mesmas tabelas.</li> <li><b>Saldo de pontos do cadastro fora:</b> é o saldo atual, que contém o futuro (vazamento).</li> <li><b>Dia de live:</b> dia com 10 ou mais usuários ativos; daí saem a presença nas lives e as lives perdidas desde a última presença.</li> <li><b>Nenhum usuário excluído</b>, nem os com poucas transações; pontos entram como percentil dentro do mês.</li> <li><b>Uma safra sorteada por usuário</b> (<code>random_state=42</code>): evita que a mesma pessoa esteja no treino e no teste. O custo é o churn da amostra subir para 72%, porque quem fica aparece em mais meses; por isso o out-of-time mantém todos os ativos do mês.</li> <li><b>Escolha pela validação cruzada</b> (3 dobras), não pelo teste.</li> <li><b>Hiperparâmetros conservadores</b> (folhas mínimas, árvores rasas) para conter o overfitting numa base de cerca de 2.800 linhas de treino.</li> <li><b>Escala</b> (<code>StandardScaler</code>) só na regressão logística; as árvores cortam por limiares.</li> </ul> <h2>🕳️ Tratamento dos nulos</h2> <p>Cada nulo foi tratado pelo que significa, tudo dentro do pipeline (<code>feature_engine</code>) e ajustado só no treino.</p> <table> <tr><th align="left">Variáveis</th><th align="left">O que o nulo significa</th><th align="left">Tratamento</th></tr> <tr><td>Cursos (<code>qtdCursosIniciados</code>, <code>qtdCursosFinalizados</code>, <code>pctMedioCompleto</code>, <code>qtdEpsD28</code>, <code>flFezCurso</code>)</td><td>Safra antes de mar/2025, quando a plataforma ainda não existia</td><td>Indicador de nulo em <code>flFezCurso</code> + 0</td></tr> <tr><td><code>qtdRedes</code></td><td>Cliente não encontrado no cadastro</td><td>0</td></tr> <tr><td><code>diasUltimoStreak</code>, <code>diasDesdeUltimoEp</code></td><td>Nunca fez</td><td>Máximo do treino (extremo do risco)</td></tr> <tr><td>Intervalos entre dias ativos</td><td>Poucos dias ativos para medir</td><td>Máximo do treino</td></tr> <tr><td>Texto (<code>fezStreak</code>, <code>gastouD28</code> etc.)</td><td>—</td><td>Colunas 0/1 (<code>OneHotEncoder</code>)</td></tr> <tr><td>Qualquer nulo restante</td><td>Coluna sem nulo no treino, mas com nulo no teste ou no out-of-time</td><td>0</td></tr> </table> <h2>📓 Notebooks</h2> <table> <tr> <th align="left">Notebook</th> <th align="left">Conteúdo</th> </tr> <tr> <td><a href="00_setup.ipynb"><code>00_setup</code></a></td> <td>Datas do projeto, tabelas, paleta e funções usadas por todos</td> </tr> <tr> <td><a href="01_discovery.ipynb"><code>01_discovery</code></a></td> <td>Raio-x das tabelas: tamanho, nulos, chaves e qualidade</td> </tr> <tr> <td><a href="02_a_feature_store.ipynb"><code>02_a_feature_store</code></a></td> <td>Feature store: features por safra em 4 tabelas, uma por bloco de comportamento</td> </tr> <tr> <td><a href="02b_abt.ipynb"><code>02b_abt</code></a></td> <td>Base analítica: alvo de churn + feature store</td> </tr> <tr> <td><a href="03_eda.ipynb"><code>03_eda</code></a></td> <td>Teste das hipóteses por bloco e síntese das features</td> </tr> <tr> <td><a href="05_train.ipynb"><code>05_train</code></a></td> <td>Treino e comparação de 5 algoritmos no MLflow, com validação cruzada em 3 dobras</td> </tr> <tr> <td><a href="06_avaliacao.ipynb"><code>06_avaliacao</code></a></td> <td>Escolha do modelo, curva ROC em treino, validação cruzada, teste e out-of-time, calibração, top 50 de junho e importância das features; registro do modelo no MLflow</td> </tr> <tr> <td><a href="07_predict.ipynb"><code>07_predict</code></a></td> <td>Carrega o modelo <code>champion</code> do MLflow, pontua jul/2026 (<code>DT_PREDICAO</code>), gera o top 50 e confere com o que aconteceu</td> </tr> </table> <h2>🔧 Como reproduzir</h2> <ol> <li>No Databricks, crie uma pasta Git a partir deste repositório.</li> <li>Garanta acesso às tabelas do <a href="https://www.kaggle.com/datasets/teocalvo/teomewhy-loyalty-system">sistema de pontos (Kaggle)</a>.</li> <li>Ajuste as datas em <code>00_setup</code> (<code>DT_INICIO</code>, <code>DT_OOT</code>, <code>DT_SCORE</code>) e a safra a pontuar em <code>07_predict</code> (<code>DT_PREDICAO</code>), se necessário.</li> <li>Rode na ordem: <code>01_discovery</code> → <code>02_a_feature_store</code> → <code>02b_abt</code> → <code>03_eda</code> → <code>05_train</code> → <code>06_avaliacao</code> → <code>07_predict</code>.</li> </ol> <h2>🚀 Próximos passos</h2> <ul> <li>✅ Base analítica com treino, out-of-time e safra de pontuação</li> <li>✅ Análise exploratória por bloco de comportamento</li> <li>✅ Modelo v0 registrado no MLflow e lista dos 50 usuários de maior risco</li> <li>⬜ Recalibrar as probabilidades (previsto 55%, real 44%)</li> <li>⬜ Reduzir o overfitting: testar a regressão logística, que empata na ordenação e decora menos o treino (4 contra 13 pontos)</li> <li>⬜ Validação temporal: treinar até um mês e validar no seguinte para escolher o modelo</li> <li>⬜ Tratar variáveis correlacionadas (ex.: recência e lives perdidas, 0,96) e usar importância por permutação</li> <li>⬜ Monitorar o desempenho a cada novo mês</li> <li>⬜ Cursos: tempo entre o início e o fim de cada curso</li> </ul> <hr> <p align="center"> Projeto desenvolvido por <b>Ana Santos</b> na pós-graduação em Ciência de Dados da ASN Rocks, com o professor <a href="https://www.twitch.tv/teomewhy">Téo Calvo (Téo Me Why)</a> · <a href="https://github.com/by-anasantos">GitHub</a> </p>
+<h1 align="center">Churn na comunidade Téo Me Why</h1>
+
+<p align="center">
+  <b>Quem vai deixar de participar da comunidade nos próximos 28 dias, e por quê?</b><br>
+  Modelo de churn com dados reais do sistema de pontos de uma comunidade de dados na Twitch.
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Databricks-003d48?style=for-the-badge&logo=databricks&logoColor=white" alt="Databricks">
+  <img src="https://img.shields.io/badge/PySpark-003d48?style=for-the-badge&logo=apachespark&logoColor=white" alt="PySpark">
+  <img src="https://img.shields.io/badge/scikit--learn-003d48?style=for-the-badge&logo=scikitlearn&logoColor=white" alt="scikit-learn">
+  <img src="https://img.shields.io/badge/MLflow-003d48?style=for-the-badge&logo=mlflow&logoColor=white" alt="MLflow">
+  <img src="https://img.shields.io/badge/status-modelo%20v0-00C2F0?style=for-the-badge" alt="Status">
+</p>
+
+<table align="center">
+  <tr>
+    <td align="center" width="33%"><h2>48%</h2>dos usuários ativos<br>saem em 28 dias</td>
+    <td align="center" width="33%"><h2>62% → 1%</h2>de churn conforme a<br>presença nas lives aumenta</td>
+    <td align="center" width="33%"><h2>88%</h2>dos 50 de maior risco em julho<br>saíram de fato (vs 45%)</td>
+  </tr>
+</table>
+
+<hr>
+
+<h2>📌 Resumo</h2>
+
+<ul>
+  <li><b>Problema:</b> quase metade dos usuários ativos deixa de participar a cada mês, e a base ativa encolheu de cerca de 675 para cerca de 250 usuários por mês entre 2024 e 2026.</li>
+  <li><b>O que explica o churn:</b> presença nas lives é o sinal mais forte, seguida de recência e frequência. Streak, variedade de interação e uso da loja também protegem. A tendência de queda na atividade <b>não</b> explica o churn.</li>
+  <li><b>Modelo:</b> 5 algoritmos comparados no MLflow. O Random Forest foi o escolhido pela maior AUC na validação cruzada (0,819); no teste fez 0,780 e no out-of-time (jun/2026), 0,868. Nesse mês, <b>80% dos 50 usuários de maior risco saíram de fato</b>, contra 44% da média: 1,8 vez mais acerto do que escolher ao acaso.</li>
+  <li><b>Entrega:</b> modelo registrado no MLflow e <code>07_predict</code>, que pontua a safra de jul/2026 (o mesmo corte da aula) e gera a lista dos 50 usuários com maior probabilidade de churn nos 28 dias a partir de 01/07/2026 (<a href="output/tables/top50_churn_2026-07-01.csv"><code>top50_churn_2026-07-01.csv</code></a>). Como julho já aconteceu e o modelo nunca viu esse mês, deu para conferir: <b>88% desses 50 saíram de fato</b>, contra 45% da média: 2,0 vezes mais acerto.</li>
+</ul>
+
+<h2>🔍 O que explica o churn (análise bivariada, <code>04_eda</code>)</h2>
+
+<table>
+  <tr><th align="left">Bloco</th><th align="left">Achado</th></tr>
+  <tr><td><b>F. Comunidade</b></td><td>Presença nas lives é o sinal mais forte: o churn cai de 62% (até 25% das lives) para 1% (acima de 75%). Quanto mais lives perdidas desde a última presença, maior o churn.</td></tr>
+  <tr><td><b>B. Volume</b></td><td>Recência: o churn dispara depois de uma semana sem aparecer. Recência e frequência juntas separam o risco de 1% a 80%.</td></tr>
+  <tr><td><b>E. Hábito</b></td><td>Streak e variedade de tipos de interação indicam vínculo e reduzem o churn.</td></tr>
+  <tr><td><b>G. Loja</b></td><td>Quem gastou pontos sai menos.</td></tr>
+  <tr><td><b>A. Perfil</b></td><td>O risco é maior entre a 3ª e a 4ª semana de casa.</td></tr>
+  <tr><td><b>C. Tendência</b></td><td>Hipótese refutada: com a mesma frequência, quem está caindo não sai mais.</td></tr>
+  <tr><td><b>H. Educação</b></td><td>Ter histórico de curso protege um pouco; estudar agora, não. As features de cursos quase não separam quem sai de quem fica.</td></tr>
+</table>
+
+<p>Os gráficos de cada análise estão em <a href="output/figs"><code>output/figs</code></a>.</p>
+
+<h2>🧭 Abordagem</h2>
+
+<table>
+  <tr>
+    <th align="left">Etapa</th>
+    <th align="left">Definição</th>
+  </tr>
+  <tr>
+    <td><b>Base</b></td>
+    <td>Uma linha por usuário e mês (<code>dtRef</code>): quem teve ao menos uma transação nos 28 dias anteriores</td>
+  </tr>
+  <tr>
+    <td><b>Alvo</b></td>
+    <td><code>churn = 1</code> se o usuário não teve nenhuma transação nos 28 dias a partir da <code>dtRef</code></td>
+  </tr>
+  <tr>
+    <td><b>Features</b></td>
+    <td>Calculadas só com dados anteriores à <code>dtRef</code>, em 8 blocos de comportamento: perfil, volume, tendência, mix, hábito, comunidade, loja e educação</td>
+  </tr>
+  <tr>
+    <td><b>Treino e teste</b></td>
+    <td>27 meses, de mar/2024 a mai/2026: 10.082 observações de 3.523 usuários. Uma safra sorteada por usuário (como na aula), para que ninguém apareça no treino e no teste ao mesmo tempo; depois, 80/20 estratificado pelo alvo</td>
+  </tr>
+  <tr>
+    <td><b>Validação cruzada</b></td>
+    <td>3 dobras dentro dos 80% de treino, usadas para escolher entre os 5 algoritmos sem tocar no teste</td>
+  </tr>
+  <tr>
+    <td><b>Out-of-time</b></td>
+    <td>jun/2026 inteiro, reservado para validar o modelo num mês que ele nunca viu</td>
+  </tr>
+  <tr>
+    <td><b>Pontuação</b></td>
+    <td>jul/2026: usuários ativos em junho, mês fora do treino</td>
+  </tr>
+</table>
+
+<h2>🤖 Modelo</h2>
+
+<table>
+  <tr>
+    <th align="left">Modelo</th>
+    <th align="center">AUC treino</th>
+    <th align="center">AUC validação cruzada</th>
+    <th align="center">AUC teste</th>
+    <th align="center">AUC out-of-time</th>
+  </tr>
+  <tr>
+    <td><b>Random Forest</b> (escolhido)</td>
+    <td align="center">0,912</td>
+    <td align="center"><b>0,819</b></td>
+    <td align="center">0,780</td>
+    <td align="center"><b>0,868</b></td>
+  </tr>
+  <tr>
+    <td>Regressão logística</td>
+    <td align="center">0,827</td>
+    <td align="center">0,805</td>
+    <td align="center">0,784</td>
+    <td align="center">0,816</td>
+  </tr>
+  <tr>
+    <td>XGBoost</td>
+    <td align="center">0,935</td>
+    <td align="center">0,802</td>
+    <td align="center">0,769</td>
+    <td align="center">0,825</td>
+  </tr>
+  <tr>
+    <td>LightGBM</td>
+    <td align="center">0,978</td>
+    <td align="center">0,792</td>
+    <td align="center">0,772</td>
+    <td align="center">0,828</td>
+  </tr>
+  <tr>
+    <td>Árvore de decisão</td>
+    <td align="center">0,862</td>
+    <td align="center">0,773</td>
+    <td align="center">0,760</td>
+    <td align="center">0,842</td>
+  </tr>
+  <tr>
+    <td><i>Referência: só a recência</i></td>
+    <td align="center">—</td>
+    <td align="center">—</td>
+    <td align="center"><i>0,712</i></td>
+    <td align="center">—</td>
+  </tr>
+</table>
+
+<p><b>Como ler as AUCs:</b></p>
+
+<ul>
+  <li><b>Treino:</b> medida nos mesmos 80% usados no ajuste. É otimista por definição e mostra quanto o modelo decora.</li>
+  <li><b>Validação cruzada:</b> média da AUC em 3 dobras dos 80% de treino; o modelo ajusta em duas e é avaliado na terceira, que não viu. <b>É ela que escolhe o modelo.</b></li>
+  <li><b>Teste:</b> 20% separados no início e avaliados uma única vez, depois da escolha.</li>
+  <li><b>Out-of-time:</b> jun/2026, mês posterior a todo o treino. Confirma que a ordem se mantém no tempo.</li>
+</ul>
+
+<p>Com 5 modelos, escolher pelo teste favoreceria quem acertou por acaso; por isso a escolha usa a validação cruzada, e o teste e o out-of-time ficam isentos para medir. No Random Forest, a validação cruzada (0,819) ficou a 4 pontos do teste (0,780): a estimativa foi confiável. A distância de 13 pontos entre treino e teste mostra que o modelo memoriza parte da amostra; reduzir isso fica para a v1.</p>
+
+
+<p>As probabilidades saem altas (55% de churn previsto contra 44% real no out-of-time), mas a ordem dos usuários está correta: a recalibração fica para a v1.</p>
+
+
+<h2>⚙️ Decisões técnicas</h2>
+
+<ul>
+  <li><b>Feature store sem vazamento:</b> cada safra é calculada só com dados anteriores à <code>dtRef</code> e gravada de forma incremental; treino e predição leem as mesmas tabelas.</li>
+  <li><b>Saldo de pontos do cadastro fora:</b> é o saldo atual, que contém o futuro (vazamento).</li>
+  <li><b>Dia de live:</b> dia com 10 ou mais usuários ativos; daí saem a presença nas lives e as lives perdidas desde a última presença.</li>
+  <li><b>Nenhum usuário excluído</b>, nem os com poucas transações; pontos entram como percentil dentro do mês.</li>
+  <li><b>Uma safra sorteada por usuário</b> (<code>random_state=42</code>): evita que a mesma pessoa esteja no treino e no teste. O custo é o churn da amostra subir para 72%, porque quem fica aparece em mais meses; por isso o out-of-time mantém todos os ativos do mês.</li>
+  <li><b>Escolha pela validação cruzada</b> (3 dobras), não pelo teste.</li>
+  <li><b>Hiperparâmetros conservadores</b> (folhas mínimas, árvores rasas) para conter o overfitting numa base de cerca de 2.800 linhas de treino.</li>
+  <li><b>Escala</b> (<code>StandardScaler</code>) só na regressão logística; as árvores cortam por limiares.</li>
+</ul>
+
+<h2>🕳️ Tratamento dos nulos</h2>
+
+<p>Cada nulo foi tratado pelo que significa, tudo dentro do pipeline (<code>feature_engine</code>) e ajustado só no treino.</p>
+
+<table>
+  <tr><th align="left">Variáveis</th><th align="left">O que o nulo significa</th><th align="left">Tratamento</th></tr>
+  <tr><td>Cursos (<code>qtdCursosIniciados</code>, <code>qtdCursosFinalizados</code>, <code>pctMedioCompleto</code>, <code>qtdEpsD28</code>, <code>flFezCurso</code>)</td><td>Safra antes de mar/2025, quando a plataforma ainda não existia</td><td>Indicador de nulo em <code>flFezCurso</code> + 0</td></tr>
+  <tr><td><code>qtdRedes</code></td><td>Cliente não encontrado no cadastro</td><td>0</td></tr>
+  <tr><td><code>diasUltimoStreak</code>, <code>diasDesdeUltimoEp</code></td><td>Nunca fez</td><td>Máximo do treino (extremo do risco)</td></tr>
+  <tr><td>Intervalos entre dias ativos</td><td>Poucos dias ativos para medir</td><td>Máximo do treino</td></tr>
+  <tr><td>Texto (<code>fezStreak</code>, <code>gastouD28</code> etc.)</td><td>—</td><td>Colunas 0/1 (<code>OneHotEncoder</code>)</td></tr>
+  <tr><td>Qualquer nulo restante</td><td>Coluna sem nulo no treino, mas com nulo no teste ou no out-of-time</td><td>0</td></tr>
+</table>
+
+<h2>📓 Notebooks</h2>
+
+<table>
+  <tr>
+    <th align="left">Notebook</th>
+    <th align="left">Conteúdo</th>
+  </tr>
+  <tr>
+    <td><a href="00_setup.ipynb"><code>00_setup</code></a></td>
+    <td>Datas do projeto, tabelas, paleta e funções usadas por todos</td>
+  </tr>
+  <tr>
+    <td><a href="01_discovery.ipynb"><code>01_discovery</code></a></td>
+    <td>Raio-x das tabelas: tamanho, nulos, chaves e qualidade</td>
+  </tr>
+  <tr>
+    <td><a href="02_feature_store.ipynb"><code>02_feature_store</code></a></td>
+    <td>Feature store: features por safra em 4 tabelas, uma por bloco de comportamento</td>
+  </tr>
+  <tr>
+    <td><a href="03_abt.ipynb"><code>03_abt</code></a></td>
+    <td>Base analítica: alvo de churn + feature store</td>
+  </tr>
+  <tr>
+    <td><a href="04_eda.ipynb"><code>04_eda</code></a></td>
+    <td>Teste das hipóteses por bloco e síntese das features</td>
+  </tr>
+  <tr>
+    <td><a href="05_train.ipynb"><code>05_train</code></a></td>
+    <td>Treino e comparação de 5 algoritmos no MLflow, com validação cruzada em 3 dobras</td>
+  </tr>
+  <tr>
+    <td><a href="06_avaliacao.ipynb"><code>06_avaliacao</code></a></td>
+    <td>Escolha do modelo, curva ROC em treino, validação cruzada, teste e out-of-time, calibração, top 50 de junho e importância das features; registro do modelo no MLflow</td>
+  </tr>
+  <tr>
+    <td><a href="07_predict.ipynb"><code>07_predict</code></a></td>
+    <td>Carrega o modelo <code>champion</code> do MLflow, pontua jul/2026 (<code>DT_PREDICAO</code>), gera o top 50 e confere com o que aconteceu</td>
+  </tr>
+</table>
+
+<h2>🔧 Como reproduzir</h2>
+
+<ol>
+  <li>No Databricks, crie uma pasta Git a partir deste repositório.</li>
+  <li>Garanta acesso às tabelas do <a href="https://www.kaggle.com/datasets/teocalvo/teomewhy-loyalty-system">sistema de pontos (Kaggle)</a>.</li>
+  <li>Ajuste as datas em <code>00_setup</code> (<code>DT_INICIO</code>, <code>DT_OOT</code>, <code>DT_SCORE</code>) e a safra a pontuar em <code>07_predict</code> (<code>DT_PREDICAO</code>), se necessário.</li>
+  <li>Rode na ordem: <code>01_discovery</code> → <code>02_feature_store</code> → <code>03_abt</code> → <code>04_eda</code> → <code>05_train</code> → <code>06_avaliacao</code> → <code>07_predict</code>.</li>
+</ol>
+
+<h2>🚀 Próximos passos</h2>
+
+<ul>
+  <li>✅ Base analítica com treino, out-of-time e safra de pontuação</li>
+  <li>✅ Análise exploratória por bloco de comportamento</li>
+  <li>✅ Modelo v0 registrado no MLflow e lista dos 50 usuários de maior risco</li>
+  <li>⬜ Recalibrar as probabilidades (previsto 55%, real 44%)</li>
+  <li>⬜ Reduzir o overfitting: testar a regressão logística, que empata na ordenação e decora menos o treino (4 contra 13 pontos)</li>
+  <li>⬜ Validação temporal: treinar até um mês e validar no seguinte para escolher o modelo</li>
+  <li>⬜ Tratar variáveis correlacionadas (ex.: recência e lives perdidas, 0,96) e usar importância por permutação</li>
+  <li>⬜ Monitorar o desempenho a cada novo mês</li>
+  <li>⬜ Cursos: tempo entre o início e o fim de cada curso</li>
+</ul>
+
+<hr>
+
+<p align="center">
+  Projeto desenvolvido por <b>Ana Santos</b> na pós-graduação em Ciência de Dados da ASN Rocks, com o professor <a href="https://www.twitch.tv/teomewhy">Téo Calvo (Téo Me Why)</a> · <a href="https://github.com/by-anasantos">GitHub</a>
+</p>

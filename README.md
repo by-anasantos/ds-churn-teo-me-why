@@ -13,6 +13,10 @@
   <img src="https://img.shields.io/badge/status-modelo%20v0-00C2F0?style=for-the-badge" alt="Status">
 </p>
 
+<p align="center">
+  📊 <a href="apresentacao_churn_teo_me_why.pdf"><b>Apresentação do projeto (PDF)</b></a>
+</p>
+
 <table align="center">
   <tr>
     <td align="center" width="33%"><h2>48%</h2>dos usuários ativos<br>saem em 28 dias</td>
